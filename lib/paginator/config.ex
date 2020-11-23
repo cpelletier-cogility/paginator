@@ -70,9 +70,21 @@ defmodule Paginator.Config do
 
   defp cursor_values_match_cursor_fields?(cursor_values, cursor_fields) do
     cursor_keys = cursor_values |> Map.keys() |> Enum.sort()
-    sorted_cursor_fields = cursor_fields |> Keyword.keys() |> Enum.sort()
+
+    sorted_cursor_fields =
+      cursor_fields |> maybe_strip_sorting_direction() |> Keyword.keys() |> Enum.sort()
 
     match?(^cursor_keys, sorted_cursor_fields)
+  end
+
+  defp maybe_strip_sorting_direction(cursor_fields) when is_tuple(cursor_fields) do
+    stripped_cursor_fields = cursor_fields |> Tuple.to_list() |> List.first()
+
+    if is_tuple(stripped_cursor_fields) do
+      stripped_cursor_fields
+    else
+      cursor_fields
+    end
   end
 
   defp limit(opts) do
